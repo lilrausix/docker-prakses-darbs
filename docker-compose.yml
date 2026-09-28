@@ -1,0 +1,41 @@
+services:
+  # 1. MariaDB Datubāze
+  db:
+    image: mariadb:11
+    container_name: mariadb_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: my_database
+      MYSQL_USER: my_user
+      MYSQL_PASSWORD: user_password
+    ports:
+      - "3307:3306" # Izmantojam 3307 uz Windows, lai netraucētu Laragon
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # 2. phpMyAdmin GUI datubāzei
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin_gui
+    restart: always
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+  # 3. Mūsu PHP aplikācija
+  web_app:
+    build: ./app
+    container_name: php_web_app
+    restart: always
+    ports:
+      - "8000:80"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
